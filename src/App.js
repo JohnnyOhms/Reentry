@@ -1,48 +1,138 @@
-import { connect } from 'react-redux';
-import { useEffect } from 'react';
-import { BrowserRouter as Router, Switch, Route} from 'react-router-dom';
-import './App.css';
-import Login from './components/Login';
-import Home from './components/Home';
-import Navbar from './components/Navbar';
-import { getUserAuth } from './actions';
+import { connect } from "react-redux";
+import { lazy, useEffect, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import MessagesPupup from "./components/Messages/MessagesPopup";
 
-import { Resource } from "./components/Resource/Resource";
-import Network from "./components/Network";
-import { Notifications } from "./components/notifications/notifications";
-import Profile  from "./components/Profile.jsx";
-import Messaging from './components/Messaging';
-import AboutUs from './components/AboutUs';
+import { getUserAuth } from "./actions";
+import Loading from "./components/Fallbacks/Loading";
+import NotFound from "./components/Fallbacks/NotFound";
 
-function App(props) {
+import Functionalities from "./components/Functionalities";
+import "./App.css";
+import "./utilities.css";
+
+import Login from "./components/Login/Welcome";
+import AgreementLogin from "./components/Login/LoginPage";
+import Navbar from "./components/Navbar/Navbar";
+
+const Home = lazy(() => import("./components/Home/Home"));
+const Notifications = lazy(() =>
+  import("./components/Notifications/Notifications")
+);
+const Network = lazy(() => import("./components/Network/index.jsx"));
+const Messaging = lazy(() => import("./components/Messages"));
+const Profile = lazy(() => import("./components//Profile/Profile"));
+const Resources = lazy(() =>
+  import("./components/ResourcesComponents/Resources")
+);
+const AboutUs = lazy(() => import("./components/AboutUs/AboutUs"));
+
+function App({ getUserAuth }) {
   useEffect(() => {
-    props.getUserAuth();
-  }, []);
-  
-    return (
+    getUserAuth();
+  }, [getUserAuth]);
+
+  return (
+    <Suspense fallback={<Loading />}>
       <div className="App">
         <Router>
-          <Switch>
-            <Route exact path="/"><Login /></Route>
-            <Route path="/home"><Navbar /><Home /></Route>
-            <Route path="/resource"><Navbar /><Resource /></Route>
-            <Route path="/notifications"><Navbar /><Notifications /></Route>
-            <Route path="/network"><Navbar /><Network /></Route>
-            <Route path="/messaging"><Navbar /><Messaging /></Route>
-            <Route path="/profile"><Navbar /><Profile /></Route>
-            <Route path="/aboutus"><Navbar/>><AboutUs /></Route>
-          </Switch>
+          <Routes>
+            <Route exact path="/" element={<Login />} />
+            <Route exact path="/agreement" element={<AgreementLogin />} />
+            <Route
+              path="/functionalities"
+              element={
+                <>
+                  <Navbar />
+                  <Functionalities />
+                </>
+              }
+            />
+            <Route
+              path="/home"
+              element={
+                <>
+                  <Navbar />
+                  <Home />
+                </>
+              }
+            />
+            <Route
+              path="/resources"
+              element={
+                <>
+                  <Navbar />
+                  <Resources />
+                </>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <>
+                  <Navbar />
+                  <Notifications />
+                </>
+              }
+            />
+            <Route
+              path="/network"
+              element={
+                <>
+                  <Navbar />
+                  <Network />
+                </>
+              }
+            />
+            <Route
+              path="/messaging/*"
+              element={
+                <>
+                  <Navbar />
+                  <Messaging />
+                </>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <>
+                  <Navbar />
+                  <Profile />
+                </>
+              }
+            />
+            <Route
+              path="/aboutus"
+              element={
+                <>
+                  <Navbar />
+                  <AboutUs />
+                </>
+              }
+            />
+            <Route
+              path="/*"
+              element={
+                <>
+                  <Navbar />
+                  <NotFound />
+                </>
+              }
+            />
+          </Routes>
         </Router>
       </div>
-    );
-  }
-  
-  const mapStateToProps = (state) => {
-    return {};
-  };
-  
-  const mapDispatchToProps = (dispatch) => ({
-    getUserAuth: () => dispatch(getUserAuth()),
-  });
-  
-  export default connect(mapStateToProps, mapDispatchToProps)(App);
+    </Suspense>
+  );
+}
+
+const mapStateToProps = (state) => {
+  return {};
+};
+
+const mapDispatchToProps = (dispatch) => ({
+  getUserAuth: () => dispatch(getUserAuth()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
